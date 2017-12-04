@@ -648,7 +648,7 @@ var/global/nologevent = 0
 		alert("Unable to start the game as it is not set up.")
 		return
 	ticker.mode.populate_department_lists() // this is temporary	
-	ticker.mode.process_medical_tasks() // this is temporary
+	ticker.mode.process_all_tasks() // this is temporary
 	var/datum/preferences/prefs = new()
 	for(var/datum/mind/employee in ticker.minds)
 		if(!employee.current) continue
@@ -712,7 +712,7 @@ var/global/nologevent = 0
 		
 	spawn(0)
 		var/datum/mind/mind = new()
-		var/mob/M = map_storage.Load_Char(usr.ckey, 1, mind, 1)
+		var/mob/M = map_storage.Load_Char_Fast(usr.ckey, 1, mind, 1)
 		M.loc = usr.loc
 /datum/admins/proc/savestation()
 	set category = "Server"
@@ -727,6 +727,16 @@ var/global/nologevent = 0
 		return
 	spawn(0)
 		ticker.savestation()
+		
+/datum/admins/proc/view_requests()
+	set category = "Admin"
+	set desc="Opens the Employee Request Console (from anywhere)"
+	set name="Open Employee Request Console"
+	if(!check_rights(R_ADMIN))
+		return
+	if(employee_control_terminal)
+		employee_control_terminal.attack_hand(usr)
+		
 /datum/admins/proc/fixapc()
 	set category = "Server"
 	set desc="Fix Apcs"

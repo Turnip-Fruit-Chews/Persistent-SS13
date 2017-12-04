@@ -143,15 +143,14 @@ var/round_start_time = 0
 	else
 		src.mode.announce()
 	spawn(0)
-		create_characters() //Create player characters and transfer them
 		collect_minds()
-		equip_characters_persistant()
+		create_characters() //Create player characters and transfer them
+	//	equip_characters_persistant()
 		setup_faction_members()
 		
-		data_core.manifest()
+	//	data_core.manifest()
 		current_state = GAME_STATE_PLAYING
-
-		callHook("roundstart")
+	callHook("roundstart")
 
 	//here to initialize the random events nicely at round start
 	setup_economy()
@@ -492,25 +491,23 @@ var/round_start_time = 0
 		if(temp_buckle)
 			qdel(temp_buckle)	//release everybody
 
-
-
 /datum/controller/gameticker/proc/create_characters()
 	for(var/mob/new_player/player in player_list)
-		if(player.ready)
-			show_info(player)
-			var/atom/movable/x = player.create_character()
-			if(x)
-				x.loc = pick(latejoin)
-				qdel(player)
-
+		spawn(0)
+			if(player.ready)
+				show_info(player)
+				var/atom/movable/x = player.create_character()
+				if(x && !x.loc)
+					x.loc = pick(latejoin)
+					qdel(player)
 
 /datum/controller/gameticker/proc/collect_minds()
 	for(var/mob/living/player in player_list)
 		if(player.mind)
 			ticker.minds += player.mind
 
-
 /datum/controller/gameticker/proc/equip_characters()
+	return 0
 	var/captainless=1
 	for(var/mob/living/player in player_list)
 		if(player && player.mind && player.mind.assigned_role)
@@ -534,6 +531,7 @@ var/round_start_time = 0
 				player.mind.faction = f
 				f.members += player.mind
 /datum/controller/gameticker/proc/equip_characters_persistant()
+	return 0
 	for(var/mob/living/player in player_list)
 		if(player && player.mind && player.mind.assigned_role)
 			if(player.mind.assigned_role != "MODE")
@@ -699,29 +697,19 @@ var/round_start_time = 0
 /datum/controller/gameticker/proc/savestation()
 	var/watch = start_watch()
 	to_chat(world, "<FONT color='blue'><B>SAVING THE STATION! THIS USUALLY TAKES UNDER 10 SECONDS</B></FONT>")
+	map_storage.Save_Records()
 	sleep(20)
 	var/started = 0
-	if(processScheduler.isRunning)
-		started = 1
-		processScheduler.stop()
 	map_storage.Save_World(the_station_areas)
-	if(started)
-		processScheduler.start()
 	log_startup_progress("	Saved the station in [stop_watch(watch)]s.")
 	return 1
 	
 /datum/controller/gameticker/proc/loadstation()
 	var/watch = start_watch()
 	var/started = 0
-	if(processScheduler.isRunning)
-		started = 1
-		processScheduler.stop()
 	log_startup_progress("Starting station load...")
-	map_storage.Load_World(list(/area/admin/persistent))
-	sleep(5)
 	map_storage.Load_World(the_station_areas)
 	if(started)
-		processScheduler.start()
 	log_startup_progress("	Loaded the station in [stop_watch(watch)]s.")
 	return 1
 	

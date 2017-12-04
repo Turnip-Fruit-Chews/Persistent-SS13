@@ -82,7 +82,7 @@
 	if(type == /area)	// override defaults for space. TODO: make space areas of type /area/space rather than /area
 		requires_power = 1
 		always_unpowered = 1
-		lighting_use_dynamic = 1
+		dynamic_lighting = 1
 		power_light = 0
 		power_equip = 0
 		power_environ = 0
@@ -430,11 +430,11 @@
 	if((istype(M,/mob/living/carbon/human/)) && (M.m_intent == "run")).
 		M.Stun(5)
 		M.Weaken(5)
-
+		M.fall(1)
 	else if(istype(M,/mob/living/carbon/human/))
 		M.Stun(2)
 		M.Weaken(2)
-
+		
 
 	to_chat(M, "Gravity!")
 

@@ -58,7 +58,7 @@ Gunshots/explosions/opening doors/less rare audio (done)
 /obj/effect/hallucination
 	invisibility = INVISIBILITY_OBSERVER
 	var/mob/living/carbon/target = null
-
+	should_save = 0
 /obj/effect/hallucination/simple
 	var/image_icon = 'icons/mob/alien.dmi'
 	var/image_state = "alienh_pounce"
@@ -618,7 +618,7 @@ var/list/non_fakeattack_weapons = list(/obj/item/weapon/gun/projectile, /obj/ite
 //			to_chat(src, "Strange Audio")
 			switch(rand(1,18))
 				if(1)
-					src << 'sound/machines/airlock.ogg'
+					src << 'sound/machines/airlock_open.ogg'
 				if(2)
 					if(prob(50))
 						src << 'sound/effects/Explosion1.ogg'

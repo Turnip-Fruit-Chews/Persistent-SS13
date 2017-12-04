@@ -373,7 +373,7 @@
 				var/obj/item/weapon/reagent_containers/glass/B = beaker
 				B.forceMove(loc)
 				beaker = null
-			default_deconstruction_crowbar(I)
+			default_deconstruction_crowbar(user, I)
 			return 1
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -427,7 +427,11 @@
 			stat |= NOPOWER
 
 /obj/machinery/chem_master/attackby(obj/item/weapon/B, mob/user, params)
-
+	if(istype(B, /obj/item/weapon/wrench))
+		to_chat(user, "<span class='notice'>You've [anchored ? "un" : ""]anchored [name].</span>")
+		playsound(src.loc, 'sound/items/Ratchet.ogg', 50, 1)
+		anchored = !anchored
+		return
 	if(istype(B, /obj/item/weapon/reagent_containers/glass) || istype(B, /obj/item/weapon/reagent_containers/food/drinks/drinkingglass))
 
 		if(beaker)
@@ -789,7 +793,7 @@
 
 	if(panel_open)
 		if(istype(B, /obj/item/weapon/crowbar))
-			default_deconstruction_crowbar(B)
+			default_deconstruction_crowbar(user, B)
 			return 1
 		else
 			to_chat(user, "<span class='warning'>You can't use the [name] while it's panel is opened!</span>")
@@ -811,7 +815,7 @@
 	var/inuse = 0
 	var/obj/item/weapon/reagent_containers/beaker = null
 	var/limit = 10
-	map_storage_saved_vars = "density;icon_state;dir;name;pixel_x;pixel_y;beaker" 
+	map_storage_saved_vars = "density;icon_state;dir;name;pixel_x;pixel_y;beaker"
 	//IMPORTANT NOTE! A negative number is a multiplier, a positive number is a flat amount to add. 0 means equal to the amount of the original reagent
 	var/list/blend_items = list (
 
@@ -874,6 +878,15 @@
 	return
 
 /obj/machinery/reagentgrinder/attackby(obj/item/O, mob/user, params)
+
+	if(fastenWrench(user, O))
+		return
+
+	if(default_deconstruction_screwdriver(user, "juicer1", "juicer1", O))
+		return
+
+	if(default_deconstruction_crowbar(user, O))
+		return
 
 	if(istype(O,/obj/item/weapon/reagent_containers/glass) || \
 		istype(O,/obj/item/weapon/reagent_containers/food/drinks/drinkingglass) || \

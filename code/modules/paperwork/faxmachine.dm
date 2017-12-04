@@ -21,7 +21,7 @@ var/list/alldepartments = list()
 	var/department = "Unknown" // our department
 
 	var/destination = "Central Command" // the department we're sending to
-
+	map_storage_saved_vars = "density;icon_state;dir;name;pixel_x;pixel_y;department;destination"
 /obj/machinery/photocopier/faxmachine/New()
 	..()
 	allfaxes += src
@@ -253,8 +253,16 @@ var/list/alldepartments = list()
 	switch(destination)
 		if("Central Command")
 			message_admins(sender, "CENTCOM FAX", destination, rcvdcopy, "#006100")
+			var/success = 0
+			for(var/obj/machinery/photocopier/faxmachine/F in allfaxes)
+				if( F.department == destination )
+					success = F.receivefax(copyitem)
 		if("Syndicate")
 			message_admins(sender, "SYNDICATE FAX", destination, rcvdcopy, "#DC143C")
+			var/success = 0
+			for(var/obj/machinery/photocopier/faxmachine/F in allfaxes)
+				if( F.department == destination )
+					success = F.receivefax(copyitem)
 	sendcooldown = 1800
 	sleep(50)
 	visible_message("[src] beeps, \"Message transmitted successfully.\"")

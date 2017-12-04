@@ -10,11 +10,10 @@
 			manifest_inject(H)
 		return
 
-/obj/effect/datacore/proc/manifest_modify(var/name, var/assignment)
+/obj/effect/datacore/proc/manifest_modify(var/name, var/assignment, var/real_title = "broke")
 	if(PDA_Manifest.len)
 		PDA_Manifest.Cut()
 	var/datum/data/record/foundrecord
-	var/real_title = assignment
 
 	for(var/datum/data/record/t in data_core.general)
 		if(t)
@@ -22,24 +21,75 @@
 				foundrecord = t
 				break
 
-	var/list/all_jobs = get_job_datums()
-
-	for(var/datum/job/J in all_jobs)
-		var/list/alttitles = get_alternate_titles(J.title)
-		if(!J)	continue
-		if(assignment in alttitles)
-			real_title = J.title
-			break
-
 	if(foundrecord)
 		foundrecord.fields["rank"] = assignment
 		foundrecord.fields["real_rank"] = real_title
-
+		
+/obj/effect/datacore/proc/get_mind(var/datum/data/record/G)
+	for(var/datum/mind/mind in ticker.minds)
+		if(mind.name == G.fields["name"])
+			return mind
+/obj/effect/datacore/proc/check_changes(var/datum/mind/mind)
+	var/cert_changed = 0
+	var/rank_changed = 0
+	
+	var/datum/data/record/G = gen_byname[mind.name]
+	if(!G)
+		message_admins("No general record found for [mind.name] check_changes")
+		return
+	if(mind.primary_cert.uid != G.fields["cert_uid"])
+		var/datum/cert/job
+		if (job_master)
+			job = job_master.GetCert(G.fields["cert_uid"])
+		else
+			return 0
+		if(job)
+			if(mind.primary_cert == mind.assigned_job)
+				mind.assigned_job = job
+				mind.primary_cert = job
+				var/obj/item/weapon/card/id/modify = mind.spawned_id
+				if(modify)
+					modify.assignment = get_default_title(modify.assigned_mind.ranks[to_strings(modify.assigned_mind.assigned_job.department_flag)], modify.assigned_mind.assigned_job)
+					modify.name = text("[modify.registered_name]'s ID Card ([modify.assignment])")
+				change_certification(mind, job)
+			mind.primary_cert = job
+			
+	var/list/record_ranks = G.fields["rank_list"]
+	for(var/i in record_ranks)
+		if(i == to_strings(mind.primary_cert.department_flag))
+			message_admins("check_changes, i == department_flag")
+			var/curr_rank = text2num(record_ranks[i])
+			message_admins("curr_rank: [curr_rank] mind.ranks: [mind.ranks[i]]")
+			if(curr_rank > text2num(mind.ranks[i]))
+				message_admins("promotion found")
+				spawn(50)
+					var/obj/item/weapon/card/id/modify = mind.spawned_id
+					if(mind.primary_cert == mind.assigned_job)
+						if(modify)
+							modify.assignment = get_default_title(record_ranks[to_strings(modify.assigned_mind.primary_cert.department_flag)], modify.assigned_mind.primary_cert)
+							modify.name = text("[modify.registered_name]'s ID Card ([modify.assignment])")
+					notify_promotion(mind, mind.primary_cert, record_ranks[i])
+	
+			if(curr_rank < text2num(mind.ranks[i]))
+				message_admins("demotion found")
+				spawn(50)
+					var/obj/item/weapon/card/id/modify = mind.spawned_id
+					if(modify)
+						modify.assignment = get_default_title(record_ranks[to_strings(modify.assigned_mind.primary_cert.department_flag)], modify.assigned_mind.primary_cert)
+						modify.name = text("[modify.registered_name]'s ID Card ([modify.assignment])")
+					notify_demotion(mind, mind.primary_cert, record_ranks[i])
+		else
+			message_admins("check_changes i does not equal department [i] [to_strings(mind.primary_cert.department_flag)]")
+	var/list/ranklist = G.fields["rank_list"]
+	mind.ranks = ranklist.Copy()
+	mind.certs = G.fields["certs"]
+	
 /obj/effect/datacore/proc/manifest_inject(var/mob/living/carbon/human/H)
 	if(PDA_Manifest.len)
 		PDA_Manifest.Cut()
 
 	if(H.mind && (H.mind.assigned_role != "MODE"))
+	
 		var/assignment
 		if(H.mind.assigned_job)
 			assignment = H.mind.assigned_job.title
@@ -49,68 +99,99 @@
 			assignment = "Unassigned"
 
 		var/id = add_zero(num2hex(rand(1, 1.6777215E7)), 6)	//this was the best they could come up with? A large random number? *sigh*
-
-
-		//General Record
-		var/datum/data/record/G = new()
-		G.fields["id"]			= id
-		G.fields["name"]		= H.real_name
-		if(H.mind.assigned_job)
-			G.fields["real_rank"]	= H.mind.assigned_job.title
-		else
-			G.fields["real_rank"] = "Unassigned (Contact NT)"
-		G.fields["rank"]		= assignment
-		G.fields["age"]			= H.age
-		G.fields["fingerprint"]	= md5(H.dna.uni_identity)
-		G.fields["p_stat"]		= "Active"
-		G.fields["m_stat"]		= "Stable"
-		G.fields["sex"]			= capitalize(H.gender)
-		G.fields["species"]		= H.get_species()
-		G.fields["photo"]		= get_id_photo(H)
-		G.fields["photo-south"] = "'data:image/png;base64,[icon2base64(icon(G.fields["photo"], dir = SOUTH))]'"
-		G.fields["photo-west"] = "'data:image/png;base64,[icon2base64(icon(G.fields["photo"], dir = WEST))]'"
-		if(H.gen_record && !jobban_isbanned(H, "Records"))
-			G.fields["notes"] = H.gen_record
-		else
-			G.fields["notes"] = "No notes found."
-		general += G
-
-		//Medical Record
-		var/datum/data/record/M = new()
-		M.fields["id"]			= id
-		M.fields["name"]		= H.real_name
-		M.fields["b_type"]		= H.b_type
-		M.fields["b_dna"]		= H.dna.unique_enzymes
-		M.fields["mi_dis"]		= "None"
-		M.fields["mi_dis_d"]	= "No minor disabilities have been declared."
-		M.fields["ma_dis"]		= "None"
-		M.fields["ma_dis_d"]	= "No major disabilities have been diagnosed."
-		M.fields["alg"]			= "None"
-		M.fields["alg_d"]		= "No allergies have been detected in this patient."
-		M.fields["cdi"]			= "None"
-		M.fields["cdi_d"]		= "No diseases have been diagnosed at the moment."
-		if(H.med_record && !jobban_isbanned(H, "Records"))
-			M.fields["notes"] = H.med_record
-		else
-			M.fields["notes"] = "No notes found."
-		medical += M
-
-		//Security Record
-		var/datum/data/record/S = new()
-		S.fields["id"]			= id
-		S.fields["name"]		= H.real_name
-		S.fields["criminal"]	= "None"
-		S.fields["mi_crim"]		= "None"
-		S.fields["mi_crim_d"]	= "No minor crime convictions."
-		S.fields["ma_crim"]		= "None"
-		S.fields["ma_crim_d"]	= "No major crime convictions."
-		S.fields["notes"]		= "No notes."
-		if(H.sec_record && !jobban_isbanned(H, "Records"))
-			S.fields["notes"] = H.sec_record
-		else
-			S.fields["notes"] = "No notes."
-		security += S
-
+		
+		var/map_storage/map_storage = new("SS13")
+		var/datum/data/record/genrec = map_storage.Load_Records(H.real_name, 1)
+		if(genrec)
+			general += genrec
+			gen_byname[H.real_name] = genrec
+			if(!genrec.fields["rank_list"])
+				genrec.fields["rank_list"] = H.mind.ranks
+			if(!genrec.fields["cert_uid"])
+				genrec.fields["cert_uid"] = H.mind.primary_cert.uid
+			if(!genrec.fields["certs"])
+				genrec.fields["certs"] = H.mind.certs
+			else if(istype(genrec.fields["cert_uid"], /list))
+				genrec.fields["cert_uid"] = H.mind.primary_cert.uid
+			check_changes(H.mind)
+		if(!genrec)
+			//General Record
+			var/datum/data/record/G = new()
+			G.fields["id"]			= id
+			G.fields["name"]		= H.real_name
+			if(H.mind.assigned_job)
+				G.fields["real_rank"]	= H.mind.assigned_job.title
+				G.fields["cert_uid"]	= H.mind.assigned_job.uid
+			else
+				G.fields["real_rank"] = "Unassigned (Contact NT)"
+				G.fields["cert_uid"] = "Unassigned (Contact NT)"
+			G.fields["rank"]		= assignment
+			G.fields["rank_list"] = H.mind.ranks
+			G.fields["certs"] = H.mind.certs
+			G.fields["age"]			= H.age
+			G.fields["fingerprint"]	= md5(H.dna.uni_identity)
+			G.fields["p_stat"]		= "Active"
+			G.fields["m_stat"]		= "Stable"
+			G.fields["sex"]			= capitalize(H.gender)
+			G.fields["species"]		= H.get_species()
+			G.fields["photo"]		= get_id_photo(H)
+			G.fields["photo-south"] = "'data:image/png;base64,[icon2base64(icon(G.fields["photo"], dir = SOUTH))]'"
+			G.fields["photo-west"] = "'data:image/png;base64,[icon2base64(icon(G.fields["photo"], dir = WEST))]'"
+			if(H.gen_record && !jobban_isbanned(H, "Records"))
+				G.fields["notes"] = H.gen_record
+			else
+				G.fields["notes"] = "No notes found."
+			general += G
+			gen_byname[H.real_name] = G
+		var/datum/data/record/medrec = map_storage.Load_Records(H.real_name, 2)
+		if(medrec)
+			medical += medrec
+			med_byname[H.real_name] = medrec
+		if(!medrec)	
+			//Medical Record
+			var/datum/data/record/M = new()
+			M.fields["id"]			= id
+			M.fields["name"]		= H.real_name
+			M.fields["b_type"]		= H.b_type
+			M.fields["b_dna"]		= H.dna.unique_enzymes
+			M.fields["mi_dis"]		= "None"
+			M.fields["mi_dis_d"]	= "No minor disabilities have been declared."
+			M.fields["ma_dis"]		= "None"
+			M.fields["ma_dis_d"]	= "No major disabilities have been diagnosed."
+			M.fields["alg"]			= "None"
+			M.fields["alg_d"]		= "No allergies have been detected in this patient."
+			M.fields["cdi"]			= "None"
+			M.fields["cdi_d"]		= "No diseases have been diagnosed at the moment."
+			if(H.med_record && !jobban_isbanned(H, "Records"))
+				M.fields["notes"] = H.med_record
+			else
+				M.fields["notes"] = "No notes found."
+			medical += M
+			med_byname[H.real_name] = M
+		var/datum/data/record/secrec = map_storage.Load_Records(H.real_name, 3)
+		if(secrec)
+			security += secrec
+			sec_byname[H.real_name] = secrec	
+		if(!secrec)	
+			//Security Record
+			var/datum/data/record/S = new()
+			S.fields["id"]			= id
+			S.fields["name"]		= H.real_name
+			S.fields["criminal"]	= "None"
+			S.fields["mi_crim"]		= "None"
+			S.fields["mi_crim_d"]	= "No minor crime convictions."
+			S.fields["ma_crim"]		= "None"
+			S.fields["ma_crim_d"]	= "No major crime convictions."
+			S.fields["notes"]		= "No notes."
+			if(H.sec_record && !jobban_isbanned(H, "Records"))
+				S.fields["notes"] = H.sec_record
+			else
+				S.fields["notes"] = "No notes."
+			security += S
+			sec_byname[H.real_name] = S
+			
+			
+			
 		//Locked Record
 		var/datum/data/record/L = new()
 		L.fields["id"]			= md5("[H.real_name][H.mind.assigned_role]")
@@ -129,7 +210,7 @@
 
 
 proc/get_id_photo_new(var/mob/living/Hu) // PERSISTANT AND MARKED FOR CHANGE
-
+	return getFlatIcon(Hu)
 	return get_id_photo_old(Hu)
 		
 	var/H = Hu.client.prefs.load_mind(Hu.client, 0, 0, 1)
@@ -160,7 +241,7 @@ proc/get_id_photo_new(var/mob/living/Hu) // PERSISTANT AND MARKED FOR CHANGE
 
 	
 proc/get_id_photo(var/mob/living/Hu) // PERSISTANT AND MARKED FOR CHANGE
-
+	return getFlatIcon(Hu)
 	return get_id_photo_old(Hu)
 		
 	var/H = Hu.client.prefs.load_mind(Hu.client, 0, 0, 1)

@@ -275,6 +275,14 @@
 	build_path = /obj/item/device/taperecorder/empty
 	category = list("initial", "Miscellaneous")
 
+/datum/design/plasuitcart
+	name = "Autoextinguisher Cartridge"
+	id = "plasuitcart"
+	build_type = AUTOLATHE
+	materials = list(MAT_METAL = 70)
+	build_path = /obj/item/weapon/plasmensuit_cartridge
+	category = list("initial", "Miscellaneous")
+
 /datum/design/tape
 	name = "Tape"
 	id = "tape"
@@ -387,6 +395,38 @@
 	build_type = AUTOLATHE
 	materials = list(MAT_METAL = 14000, MAT_GLASS = 8000)
 	build_path = /obj/item/mounted/frame/newscaster_frame
+	category = list("initial", "Construction")
+
+/datum/design/barsign_frame
+	name = "Bar Sign Frame"
+	id = "barsign_frame"
+	build_type = AUTOLATHE
+	materials = list(MAT_METAL = 28000, MAT_GLASS = 16000)
+	build_path = /obj/item/mounted/frame/barsign_frame
+	category = list("initial", "Construction")
+
+/datum/design/extinguisher_cabinet_frame
+	name = "Extinguisher Cabinet Frame"
+	id = "extinguisher_cabinet_frame"
+	build_type = AUTOLATHE
+	materials = list(MAT_METAL = 10000, MAT_GLASS = 2000)
+	build_path = /obj/item/mounted/frame/extinguisher_cabinet_frame
+	category = list("initial", "Construction")
+
+/datum/design/mirror_frame
+	name = "Mirror"
+	id = "mirror_frame"
+	build_type = AUTOLATHE
+	materials = list(MAT_METAL = 1000, MAT_GLASS = 8000)
+	build_path = /obj/item/mounted/frame/mirror_frame
+	category = list("initial", "Construction")
+
+/datum/design/atm_frame
+	name = "ATM"
+	id = "atm_frame"
+	build_type = AUTOLATHE
+	materials = list(MAT_METAL = 8000, MAT_GLASS = 4000)
+	build_path = /obj/item/mounted/frame/atm_frame
 	category = list("initial", "Construction")
 
 /datum/design/rcd_ammo
@@ -654,6 +694,13 @@
 	build_type = AUTOLATHE
 	materials = list(MAT_METAL = 30000)
 	build_path = /obj/item/weapon/rcd
+	category = list("hacked", "Construction")
+/datum/design/rpd
+	name = "Rapid Pipe Dispenser (RPD)"
+	id = "rpd"
+	build_type = AUTOLATHE
+	materials = list(MAT_METAL = 75000, MAT_GLASS = 37500)
+	build_path = /obj/item/weapon/rpd
 	category = list("hacked", "Construction")
 
 /datum/design/shotgun_dart

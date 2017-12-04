@@ -461,7 +461,7 @@
 		if(anchored==2)
 			to_chat(user, "Unscrew the hoses first!")
 			return
-		default_deconstruction_crowbar(O, 1)
+		default_deconstruction_crowbar(user, O, 1)
 
 	//--FalseIncarnate
 	//Check if held item is an open container
@@ -726,7 +726,7 @@
 			var/atom/movable/lighting_overlay/L = locate(/atom/movable/lighting_overlay) in T
 			var/light_available
 			if(L)
-				light_available = L.get_clamped_lum()*10
+				light_available = T.get_lumcount()*10
 			else
 				light_available =  5
 			light_string = "a light level of [light_available] lumens"

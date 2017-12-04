@@ -42,10 +42,14 @@
 		sleep(5)
 		icon_state = initial(icon_state)
 		updateUsrDialog()
-	else if(istype(P, /obj/item/weapon/wrench))
-		playsound(loc, 'sound/items/Ratchet.ogg', 50, 1)
-		anchored = !anchored
-		to_chat(user, "<span class='notice'>You [anchored ? "wrench" : "unwrench"] \the [src].</span>")
+		playsound(loc, "sound/effects/filing_cabinet.ogg", 50, 1)
+	else if(fastenWrench(user, P))
+	else if(actWeld(user, P, skill = 0, message = "You start deconstructing \the [name]."))
+		to_chat(user, "<span class='notice'>You deconstruct \the [src]!</span>")
+		new /obj/item/stack/sheet/metal(src.loc, 5)
+		for(var/obj/item/I in src)
+			I.loc = src.loc
+		qdel(src)
 	else
 		to_chat(user, "<span class='notice'>You can't put [P] in [src]!</span>")
 
@@ -92,6 +96,7 @@
 		if(istype(P) && (P.loc == src) && src.Adjacent(usr))
 			usr.put_in_hands(P)
 			updateUsrDialog()
+			playsound(loc, "sound/effects/filing_cabinet.ogg", 50, 1)
 			icon_state = "[initial(icon_state)]-open"
 			spawn(0)
 				sleep(5)
@@ -102,7 +107,7 @@
  * Security Record Cabinets
  */
 /obj/structure/filingcabinet/security
-	var/virgin = 1
+	var/virgin = 0
 
 
 /obj/structure/filingcabinet/security/proc/populate()
@@ -139,7 +144,7 @@
  * Medical Record Cabinets
  */
 /obj/structure/filingcabinet/medical
-	var/virgin = 1
+	var/virgin = 0
 
 /obj/structure/filingcabinet/medical/proc/populate()
 	if(virgin)

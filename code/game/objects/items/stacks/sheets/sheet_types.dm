@@ -43,6 +43,11 @@ var/global/list/datum/stack_recipe/metal_recipes = list(
 	new /datum/stack_recipe("glass table frame parts", /obj/item/weapon/table_parts/glass, 2),
 	new /datum/stack_recipe("rack parts", /obj/item/weapon/rack_parts),
 	new /datum/stack_recipe("closet", /obj/structure/closet, 2, time = 15, one_per_turf = 1, on_floor = 1),
+	new /datum/stack_recipe_list("filing cabinets", list(
+		new /datum/stack_recipe("black filing cabinet", /obj/structure/filingcabinet, 5, time = 15, one_per_turf = 1, on_floor = 1),
+		new /datum/stack_recipe("grey filing cabinet", /obj/structure/filingcabinet/filingcabinet, 5, time = 15, one_per_turf = 1, on_floor = 1),
+		new /datum/stack_recipe("filing drawer", /obj/structure/filingcabinet/chestdrawer, 5, time = 15, one_per_turf = 1, on_floor = 1)
+	), 5),
 	null,
 	new /datum/stack_recipe("canister", /obj/machinery/portable_atmospherics/canister, 10, time = 15, one_per_turf = 1, on_floor = 1),
 	null,
@@ -72,6 +77,7 @@ var/global/list/datum/stack_recipe/metal_recipes = list(
 		new /datum/stack_recipe("maintenance hatch assembly", /obj/structure/door_assembly/door_assembly_mhatch, 4, time = 50, one_per_turf = 1, on_floor = 1),
 		new /datum/stack_recipe("high security airlock assembly", /obj/structure/door_assembly/door_assembly_highsecurity, 4, time = 50, one_per_turf = 1, on_floor = 1),
 		new /datum/stack_recipe("multi-tile airlock assembly", /obj/structure/door_assembly/multi_tile, 4, time = 50, one_per_turf = 1, on_floor = 1),
+		new /datum/stack_recipe("emergency airlock assembly", /obj/structure/door_assembly/door_assembly_emerg, 4, time = 50, one_per_turf = 1, on_floor = 1),
 	), 4),
 	null,
 	new /datum/stack_recipe("mass driver button frame", /obj/item/mounted/frame/driver_button, 1, time = 50, one_per_turf = 0, on_floor = 1),
@@ -85,7 +91,11 @@ var/global/list/datum/stack_recipe/metal_recipes = list(
 	new /datum/stack_recipe("air alarm frame", /obj/item/mounted/frame/alarm_frame, 2),
 	new /datum/stack_recipe("fire alarm frame", /obj/item/mounted/frame/firealarm, 2),
 	new /datum/stack_recipe("intercom frame", /obj/item/mounted/frame/intercom, 2),
-	null
+	null,
+	new /datum/stack_recipe("bedsheet bin", /obj/structure/bedsheetbin, 3, time = 20, one_per_turf = 1, on_floor = 1),
+	new /datum/stack_recipe("sink", /obj/structure/sink, 2, time = 20, one_per_turf = 1, on_floor = 1),
+	new /datum/stack_recipe("toilet", /obj/structure/toilet, 2, time = 20, one_per_turf = 1, on_floor = 1),
+	new /datum/stack_recipe("shower", /obj/machinery/shower, 2, time = 20, one_per_turf = 1, on_floor = 1),
 )
 
 /obj/item/stack/sheet/metal
@@ -146,7 +156,8 @@ var/global/list/datum/stack_recipe/wood_recipes = list(
 	new /datum/stack_recipe("easel", /obj/structure/easel, 3, one_per_turf = 1, on_floor = 1),
 	new /datum/stack_recipe("wooden buckler", /obj/item/weapon/shield/riot/buckler, 20, time = 40),
 	new /datum/stack_recipe("apiary", /obj/structure/beebox, 40, time = 50),
-	new /datum/stack_recipe("honey frame", /obj/item/honey_frame, 5, time = 10)
+	new /datum/stack_recipe("honey frame", /obj/item/honey_frame, 5, time = 10),
+	new /datum/stack_recipe("noticeboard frame", /obj/item/mounted/frame/noticeboard_frame, 3, time = 10)
 )
 
 /obj/item/stack/sheet/wood
@@ -165,6 +176,12 @@ var/global/list/datum/stack_recipe/wood_recipes = list(
 /*
  * Cloth
  */
+
+var/global/list/datum/stack_recipe/cloth_recipes = list (
+	new /datum/stack_recipe("curtain", /obj/structure/curtain, 5, time = 10, one_per_turf = 1, on_floor = 1),
+	new /datum/stack_recipe("bed sheet", /obj/item/weapon/bedsheet, 5, time = 10)
+)
+
 /obj/item/stack/sheet/cloth
 	name = "cloth"
 	desc = "This roll of cloth is made from only the finest chemicals and bunny rabbits."
@@ -173,6 +190,9 @@ var/global/list/datum/stack_recipe/wood_recipes = list(
 	origin_tech = "materials=2"
 	burn_state = FLAMMABLE
 
+/obj/item/stack/sheet/cloth/New(var/loc, var/amt = null)
+	recipes = cloth_recipes
+	return ..()
 /*
  * Cardboard
  */
@@ -187,7 +207,7 @@ var/global/list/datum/stack_recipe/cardboard_recipes = list (
 	new /datum/stack_recipe("pizza box", /obj/item/pizzabox),
 	new /datum/stack_recipe("folder", /obj/item/weapon/folder),
 	new /datum/stack_recipe("cardboard tube", /obj/item/weapon/c_tube),
-	new /datum/stack_recipe("cardboard box", /obj/structure/closet/cardboard, 4),
+	new /datum/stack_recipe("cardboard box", /obj/structure/closet/cardboard, 4)
 )
 
 /obj/item/stack/sheet/cardboard	//BubbleWrap

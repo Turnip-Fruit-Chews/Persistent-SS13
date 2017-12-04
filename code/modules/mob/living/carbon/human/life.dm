@@ -15,6 +15,8 @@
 	var/tinttotal = 0				// Total level of visually impairing items
 
 /mob/living/carbon/human/Life()
+	if(disable_process)
+		return
 	fire_alert = 0 //Reset this here, because both breathe() and handle_environment() have a chance to set it.
 	tinttotal = tintcheck() //here as both hud updates and status updates call it
 	life_tick++
@@ -965,13 +967,6 @@
 
 				// make it so you can only puke so fast
 				lastpuke = 0
-
-	//0.1% chance of playing a scary sound to someone who's in complete darkness
-	if(isturf(loc) && rand(1,1000) == 1)
-		var/turf/currentTurf = loc
-		var/atom/movable/lighting_overlay/L = locate(/atom/movable/lighting_overlay) in currentTurf
-		if(L && L.lum_r + L.lum_g + L.lum_b == 0)
-			playsound_local(src,pick(scarySounds),50, 1, -1)
 
 /mob/living/carbon/human/handle_changeling()
 	if(mind)

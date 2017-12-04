@@ -8,6 +8,9 @@
 	use_power = 1
 	idle_power_usage = 20
 	active_power_usage = 5000
+	
+	map_storage_saved_vars = "density;icon_state;dir;name;pixel_x;pixel_y;req_access_txt;req_personal;materials;component_parts"
+	
 	var/time_coeff = 1
 	var/list/resources = list(
 								MAT_METAL=0,
@@ -466,7 +469,7 @@
 		if(istype(W, /obj/item/weapon/crowbar))
 			for(var/material in resources)
 				remove_material(material, resources[material]/MINERAL_MATERIAL_AMOUNT)
-			default_deconstruction_crowbar(W)
+			default_deconstruction_crowbar(user, W)
 			return 1
 		else
 			to_chat(user, "<span class='danger'>You can't load \the [name] while it's opened.</span>")

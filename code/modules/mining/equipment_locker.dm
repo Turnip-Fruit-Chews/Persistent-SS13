@@ -59,6 +59,7 @@
 							i++
 							linked_department.conglo_amount += 5
 							B.conglo_amount--
+							B.update()
 					if(i >= pickup_rate)
 						break
 					if(B.orichilum_amount)
@@ -69,6 +70,7 @@
 							i++
 							linked_department.orichilum_amount += 5
 							B.orichilum_amount--
+							B.update()
 				if(i >= pickup_rate)
 					if(found)
 						playsound(loc, "sound/machines/disposalflush.ogg", 75,1)
@@ -272,10 +274,10 @@
 	if(panel_open)
 		if(istype(W, /obj/item/weapon/crowbar))
 			empty_content()
-			default_deconstruction_crowbar(W)
+			default_deconstruction_crowbar(user, W)
 		return
 
-	if(default_unfasten_wrench(user, W))
+	if(fastenWrench(user, W))
 		return
 
 	..()
@@ -598,7 +600,7 @@
 		return
 	if(panel_open)
 		if(istype(I, /obj/item/weapon/crowbar))
-			default_deconstruction_crowbar(I)
+			default_deconstruction_crowbar(user, I)
 		return 1
 	..()
 
@@ -1115,7 +1117,7 @@
 
 /obj/item/device/mineral_scanner/proc/scan(var/mob/user, var/turf/T)
 	user.visible_message("<span class='notice'>[user] begins scanning [T] for mineable materials.</span>")
-	switch(do_after_stat(user, delay = 70, needhand = 1, target = T, progress = 1, action_name = "take mineral readings", auto_emote = 1, stat_used = 5, minimum = 2, maximum =10, maxed_delay = 30, progressive_failure = 1, minimum_probability = 50, help_able = 0, help_ratio = 1, stamina_use = 2, stamina_used = 5, progressive_stamina = 1, attempt_cost = 5, stamina_use_fail = 1, sound_file = 'sound/machines/signal.ogg'))
+	switch(do_after_stat(user, delay = 70, needhand = 1, target = T, progress = 1, action_name = "take mineral readings", auto_emote = 1, stat_used = 5, minimum = 2, maximum =10, maxed_delay = 30, progressive_failure = 1, minimum_probability = 50, help_able = 0, help_ratio = 1, stamina_use = 2, stamina_used = 2, progressive_stamina = 1, attempt_cost = 5, stamina_use_fail = 1, sound_file = 'sound/machines/signal.ogg'))
 		if(1)
 			if(istype(T, /turf/simulated/floor/plating/airless/asteroid/ore))
 				var/turf/simulated/floor/plating/airless/asteroid/ore/oreturf = T
@@ -1135,18 +1137,18 @@
 				var/eastmove = 0 // 1 = east 2 = west 0 = neither
 				var/vert = 0
 				var/hori = 0
-				if(oreturf.x > x)
+				if(oreturf.x > T.x)
 					eastmove = 1
-					hori = oreturf.x - x
-				else if(oreturf.x < x)
+					hori = oreturf.x - T.x
+				else if(oreturf.x < T.x)
 					eastmove = 2
-					hori = x - oreturf.x
-				if(oreturf.y > y)
+					hori = T.x - oreturf.x
+				if(oreturf.y > T.x)
 					northmove = 1
-					vert = oreturf.y - y
-				else if(oreturf.y < y)
+					vert = oreturf.y - T.y
+				else if(oreturf.y < T.y)
 					northmove = 2
-					vert = y - oreturf.y
+					vert = T.y - oreturf.y
 				to_chat(user,"The scan reveals there is [oreturf.resource_remaining] units of [oreturf.oretype] close by.")
 				if(northmove == 1)
 					to_chat(user,"It is [vert] to the north.")

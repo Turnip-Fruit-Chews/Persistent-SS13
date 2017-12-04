@@ -95,6 +95,8 @@
 	var/charges = 0.0
 	var/nutrition = 400.0//Carbon
 
+	var/disable_process = 0
+	
 	var/overeatduration = 0		// How long this guy is overeating //Carbon
 	var/paralysis = 0
 	var/stunned = 0
@@ -151,7 +153,7 @@
 
 	var/has_enabled_antagHUD = 0
 	var/antagHUD = 0
-
+	map_storage_saved_vars = "real_name;name"
 //Generic list for proc holders. Only way I can see to enable certain verbs/procs. Should be modified if needed.
 	var/proc_holder_list[] = list()
 
@@ -225,3 +227,5 @@
 	var/list/permanent_huds = list()
 
 	var/list/actions = list()
+	
+	var/on_ride = 0

@@ -28,7 +28,7 @@
 	var/prod_coeff
 	var/datum/wires/autolathe/wires = null
 
-	map_storage_saved_vars = "materials;files;density;icon_state;dir;name;pixel_x;pixel_y;req_access_txt;req_personal"
+	map_storage_saved_vars = "component_parts;materials;files;density;icon_state;dir;name;pixel_x;pixel_y;req_access_txt;req_personal"
 	
 	var/list/being_built = list()
 	var/datum/research/files
@@ -123,7 +123,7 @@
 	if(panel_open)
 		if(istype(O, /obj/item/weapon/crowbar))
 			materials.retrieve_all()
-			default_deconstruction_crowbar(O)
+			default_deconstruction_crowbar(user, O)
 			return 1
 		else
 			attack_hand(user)
